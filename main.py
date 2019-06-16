@@ -24,7 +24,14 @@ classes = ["A", "B", "C", "D", "E", "F"]
 
 
 subjects = ["język polski","język obcy","historia","wos","matematyka","fizyka","chemia","biologia","geografia"]
-marksToPoints = {
+marksToPoints_gimnazjum = {
+    6: 18,
+    5: 17,
+    4: 14,
+    3: 8,
+    2: 2,
+}
+marksToPoints_podstawowka = {
     6: 18,
     5: 17,
     4: 14,
@@ -39,41 +46,85 @@ marksToPoints = {
 df = pandas.read_csv('data1.csv', encoding = "windows-1250")
 df = df.fillna(0)
 for sub in subjects:
-    df[sub] = df[sub].replace(marksToPoints)
-#TODO: gimnazja - przeliczniea egzaminów, sprawdzenie wstępne ocen <2, 6>
-namesWithScores = df.assign(points_a = df['język polski'] + df["matematyka"]
-                                           + df[classRequirements["a1"]] + df[classRequirements["a2"]] +
-                       .2*(df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
-                           df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
-                        df["punkty dodatkowe"],
-                            points_b=df['język polski'] + df["matematyka"]
+    if not df[sub].between(2, 6).any:
+        print("UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 5!!!!!!!!!! w " + sub)
+        print(df[subjects][df[subjects] < 2 or df[subjects] > 6])
+    else:
+        print("OCENY POPRAWNE dla " + sub)
+
+#TODO: sprawdzenie wstępne ocen <2, 6>
+if "egzamin historia" in df.columns:
+    for sub in subjects:
+        df[sub] = df[sub].replace(marksToPoints_gimnazjum)
+
+    namesWithScores = df.assign(points_a = df['język polski'] + df["matematyka"]
+                                               + df[classRequirements["a1"]] + df[classRequirements["a2"]] +
+                           .2*(df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
+                               df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
+                            df["punkty dodatkowe"],
+                                points_b=df['język polski'] + df["matematyka"]
+                                             + df[classRequirements["b1"]] + df[classRequirements["b2"]] +
+                             .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
+                               df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
+                            df["punkty dodatkowe"],
+                                points_c=df['język polski'] + df["matematyka"]
+                                            + df[classRequirements["c1"]] + df[classRequirements["c2"]] +
+                             .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
+                               df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
+                             df["punkty dodatkowe"],
+                                points_d=df['język polski'] + df["matematyka"]
+                                    + df[classRequirements["d1"]] + df[classRequirements["d2"]] +
+                             .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
+                               df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
+                             df["punkty dodatkowe"],
+                                points_e=df['język polski'] + df["matematyka"]
+                                            + df[classRequirements["e1"]] + df[classRequirements["e2"]] +
+                             .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
+                               df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
+                             df["punkty dodatkowe"],
+                                points_f=df['język polski'] + df["matematyka"]
+                                            + df[classRequirements["f1"]] + df[classRequirements["f2"]] +
+                             .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
+                               df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
+                             df["punkty dodatkowe"])
+    exams = ["egzamin polski", "egzamin historia", "egzamin matematyka", "egzamin przyroda","egzamin język","wyróżnienie","punkty dodatkowe"]
+else:
+    for sub in subjects:
+        df[sub] = df[sub].replace(marksToPoints_podstawowka)
+
+    namesWithScores = df.assign(points_a=df['język polski'] + df["matematyka"]
+                                         + df[classRequirements["a1"]] + df[classRequirements["a2"]] +
+                                         .35 * df["egzamin polski"] + .35*df[
+                                    "egzamin matematyka"] + .3 * df["egzamin język"] + df["wyróżnienie"] + \
+                                         df["punkty dodatkowe"],
+                                points_b=df['język polski'] + df["matematyka"]
                                          + df[classRequirements["b1"]] + df[classRequirements["b2"]] +
-                         .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
-                           df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
-                        df["punkty dodatkowe"],
-                            points_c=df['język polski'] + df["matematyka"]
-                                        + df[classRequirements["c1"]] + df[classRequirements["c2"]] +
-                         .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
-                           df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
-                         df["punkty dodatkowe"],
-                            points_d=df['język polski'] + df["matematyka"]
-                                + df[classRequirements["d1"]] + df[classRequirements["d2"]] +
-                         .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
-                           df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
-                         df["punkty dodatkowe"],
-                            points_e=df['język polski'] + df["matematyka"]
-                                        + df[classRequirements["e1"]] + df[classRequirements["e2"]] +
-                         .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
-                           df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
-                         df["punkty dodatkowe"],
-                            points_f=df['język polski'] + df["matematyka"]
-                                        + df[classRequirements["f1"]] + df[classRequirements["f2"]] +
-                         .2 * (df["egzamin polski"] + df["egzamin historia"] + df["egzamin matematyka"] +
-                           df["egzamin przyroda"] + df["egzamin język"]) + df["wyróżnienie"] + \
-                         df["punkty dodatkowe"])
+                                         .35 * df["egzamin polski"] + .35 * df[
+                                             "egzamin matematyka"] + .3 * df["egzamin język"] + df["wyróżnienie"] + \
+                                         df["punkty dodatkowe"],
+                                points_c=df['język polski'] + df["matematyka"]
+                                         + df[classRequirements["c1"]] + df[classRequirements["c2"]] +
+                                         .35 * df["egzamin polski"] + .35 * df[
+                                             "egzamin matematyka"] + .3 * df["egzamin język"] + df["wyróżnienie"] + \
+                                         df["punkty dodatkowe"],
+                                points_d=df['język polski'] + df["matematyka"]
+                                         + df[classRequirements["d1"]] + df[classRequirements["d2"]] +
+                                         .35 * df["egzamin polski"] + .35 * df[
+                                             "egzamin matematyka"] + .3 * df["egzamin język"] + df["wyróżnienie"] + \
+                                         df["punkty dodatkowe"],
+                                points_e=df['język polski'] + df["matematyka"]
+                                         + df[classRequirements["e1"]] + df[classRequirements["e2"]] +
+                                         .35 * df["egzamin polski"] + .35 * df[
+                                             "egzamin matematyka"] + .3 * df["egzamin język"] + df["wyróżnienie"] + \
+                                         df["punkty dodatkowe"],
+                                points_f=df['język polski'] + df["matematyka"]
+                                         + df[classRequirements["f1"]] + df[classRequirements["f2"]] +
+                                         .35 * df["egzamin polski"] + .35 * df[
+                                             "egzamin matematyka"] + .3 * df["egzamin język"] + df["wyróżnienie"] + \
+                                         df["punkty dodatkowe"])
+    exams = ["egzamin polski", "egzamin matematyka", "egzamin język",
+             "wyróżnienie", "punkty dodatkowe"]
 
-
-exams = ["egzamin polski", "egzamin historia", "egzamin matematyka", "egzamin przyroda","egzamin język","wyróżnienie","punkty dodatkowe"]
 general_sheet = namesWithScores.sort_values(by=["Nazwisko i imię"])
 general_sheet.drop(subjects, inplace=True, axis=1)
 # general_sheet.drop(choicesList, inplace=True, axis=1)
