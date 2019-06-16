@@ -51,12 +51,12 @@ for sub in subjects:
         print("UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub)
         print(df[df[sub] > 6]["Nazwisko i imię"])
         status = status + "UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub + '\n'
-        status = status + df[df[sub] > 6]["Nazwisko i imię"] + '\n'
+        status = status + str(df[df[sub] > 6]["Nazwisko i imię"]) + '\n'
     elif not df[sub].gt(1).all(axis = 0):
         print("UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub)
         print(df[df[sub] < 2]["Nazwisko i imię"])
         status = status + "UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub + '\n'
-        status = status + df[df[sub] > 6]["Nazwisko i imię"] + '\n'
+        status = status + str(df[df[sub] < 2]["Nazwisko i imię"]) + '\n'
     else:
         print("OCENY POPRAWNE dla " + sub)
         status = status + "OCENY POPRAWNE dla " + sub +'\n'
@@ -235,3 +235,7 @@ status = status + "Liczba uczniów na listach wyjściowych: "+ str(sum) +'\n'
 
 print("________________________________________")
 print(status)
+
+file = open("status.txt", "w")
+file.write(status)
+file.close()
