@@ -1,24 +1,24 @@
 import pandas
 from config import *
 
-
+status = " "
 choicesList_special = ["pierwszy wybór", "drugi wybór", "trzeci wybór", "czwarty wybór", "piąty wybór", "szósty wybór"]
 
 choicesList = ["drugi wybór", "trzeci wybór", "czwarty wybór", "piąty wybór", "szósty wybór"]
 classCount = liczba_osob_przyjetych
 #every class requires polish, math and two selected subjects
 classRequirements = {"a1": "język obcy",
-                     "a2": "geografia",
-                     "b1": "język obcy",
-                     "b2": "fizyka",
+                     "a2": "historia",
+                     "b1": "biologia",
+                     "b2": "geografia",
                      "c1": "biologia",
                      "c2": "chemia",
-                     "d1": "biologia",
-                     "d2": "geografia",
+                     "d1": "język obcy",
+                     "d2": "biologia",
                      "e1": "język obcy",
-                     "e2": "historia",
+                     "e2": "fizyka",
                      "f1": "język obcy",
-                     "f2": "biologia",
+                     "f2": "geografia",
                      }
 classes = ["A", "B", "C", "D", "E", "F"]
 
@@ -43,17 +43,27 @@ marksToPoints_podstawowka = {
 # namesWithScores = pandas.DataFrame(columns=["Imię i nazwisko", "PunktyA", "PunktyB", "PunktyC", "PunktyD",
 #                                             "PunktyE", "PunktyF"])
 
-df = pandas.read_csv('data1.csv', encoding = "windows-1250")
+df = pandas.read_csv('data.csv', encoding = "windows-1250")
 df = df.fillna(0)
+
 for sub in subjects:
-    if not df[sub].between(2, 6).any:
-        print("UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 5!!!!!!!!!! w " + sub)
-        print(df[subjects][df[subjects] < 2 or df[subjects] > 6])
+    if not df[sub].lt(7).all(axis = 0):
+        print("UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub)
+        print(df[df[sub] > 6]["Nazwisko i imię"])
+        status = status + "UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub + '\n'
+        status = status + df[df[sub] > 6]["Nazwisko i imię"] + '\n'
+    elif not df[sub].gt(1).all(axis = 0):
+        print("UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub)
+        print(df[df[sub] < 2]["Nazwisko i imię"])
+        status = status + "UWAGA: ZNALEZIONO OCENĘ POZA ZAKRESEM 2 do 6!!!!!!!!!! w " + sub + '\n'
+        status = status + df[df[sub] > 6]["Nazwisko i imię"] + '\n'
     else:
         print("OCENY POPRAWNE dla " + sub)
+        status = status + "OCENY POPRAWNE dla " + sub +'\n'
 
-#TODO: sprawdzenie wstępne ocen <2, 6>
 if "egzamin historia" in df.columns:
+    print("WYKRYTO TYP SZKOLY: GIMNAZJUM")
+    status = status + "WYKRYTO TYP SZKOLY: GIMNAZJUM" + '\n'
     for sub in subjects:
         df[sub] = df[sub].replace(marksToPoints_gimnazjum)
 
@@ -89,6 +99,8 @@ if "egzamin historia" in df.columns:
                              df["punkty dodatkowe"])
     exams = ["egzamin polski", "egzamin historia", "egzamin matematyka", "egzamin przyroda","egzamin język","wyróżnienie","punkty dodatkowe"]
 else:
+    print("WYKRYTO TYP SZKOLY: SZKOLA PODSTAWOWA")
+    status = status + "WYKRYTO TYP SZKOLY: SZKOLA PODSTAWOWA" + '\n'
     for sub in subjects:
         df[sub] = df[sub].replace(marksToPoints_podstawowka)
 
@@ -216,3 +228,10 @@ for list in accepted_class:
 for list in rejected_class:
     sum += rejected_class[list].shape[0]
 print("Liczba uczniów na listach wyjściowych: "+ str(sum) +'\n')
+
+status = status + "Liczba uczniów na liście wejściowej: "+ str(namesWithScores.shape[0])+'\n'
+status = status + "Liczba uczniów na listach wyjściowych: "+ str(sum) +'\n'
+
+
+print("________________________________________")
+print(status)
