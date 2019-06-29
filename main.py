@@ -43,7 +43,7 @@ marksToPoints_podstawowka = {
 # namesWithScores = pandas.DataFrame(columns=["Imię i nazwisko", "PunktyA", "PunktyB", "PunktyC", "PunktyD",
 #                                             "PunktyE", "PunktyF"])
 
-df = pandas.read_csv('data.csv', encoding = "windows-1250")
+df = pandas.read_csv('data.csv', encoding = "windows-1250", sep=separator)
 df = df.fillna(0)
 
 for sub in subjects:
@@ -162,7 +162,7 @@ writer_general = pandas.ExcelWriter("general.xlsx", engine='openpyxl')
 for cls in classes:
     general_sheet[general_sheet["pierwszy wybór"] == cls].to_excel(writer_general, sheet_name=cls)
 
-general_sheet.to_excel(writer_general)
+general_sheet.to_excel(writer_general, sheet_name='general')
 writer_general.save()
 
 ranking_class = dict()
@@ -178,18 +178,22 @@ ranking_class_first_choice = ranking_class.copy()
 
 for choice in choicesList:
     for cls in classes:
-        ranking_class[cls] = ranking_class[cls].sort_values("points_" + str(cls).lower(), ascending=False)
-        accepted_class[cls] = ranking_class[cls].head(classCount[cls])
-        rejected_class[cls] = ranking_class[cls].tail(max(0, ranking_class[cls].shape[0]-classCount[cls]))
         for subcls in classes:
             if cls != subcls:
-                ranking_class[cls] = ranking_class[cls].append(rejected_class[subcls][rejected_class[subcls][choice] == cls])
-                ranking_class[subcls] = ranking_class[subcls].drop(ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0]-classCount[subcls]))[ranking_class[subcls][choice] == cls].index)
+                ranking_class[cls] = ranking_class[cls].append(rejected_class[subcls][rejected_class[subcls][choice] == cls], ignore_index=True)
+                ranking_class[cls] = ranking_class[cls].sort_values("points_" + str(cls).lower(), ascending=False)
+                accepted_class[cls] = ranking_class[cls].head(classCount[cls])
+                rejected_class[cls] = ranking_class[cls].tail(max(0, ranking_class[cls].shape[0]-classCount[cls]))
+                # ranking_class[subcls] = ranking_class[subcls][ranking_class[subcls][choice] != cls ]
+                # ranking_class[subcls].drop(rejected_class[subcls][rejected_class[subcls][choice] == cls]["Nazwisko i imię"], inplace=True)
+                ranking_class[subcls].drop(ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0]-classCount[subcls]))[ranking_class[subcls][choice] == cls].index, inplace=True)
                 # ranking_class[subcls] = ranking_class[subcls][:-max(0, ranking_class[subcls].shape[0]-classCount[subcls])][ranking_class[subcls][choice] != cls]
-                ranking_class[subcls] = ranking_class[subcls].sort_values("points_" + str(subcls).lower(), ascending=False)
+                ranking_class[subcls].sort_values("points_" + str(subcls).lower(), ascending=False, inplace = True)
                 accepted_class[subcls] = ranking_class[subcls].head(classCount[subcls])
                 rejected_class[subcls] = ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0] - classCount[subcls]))
+
                 # rejected_class[subcls] = rejected_class[subcls][rejected_class[subcls][choice] != cls]
+
 
 
 path = r"results_excel.xlsx"
@@ -199,21 +203,36 @@ writer = pandas.ExcelWriter(path, engine='openpyxl')
 writer_rejected = pandas.ExcelWriter(path_rejected, engine='openpyxl')
 writer_first_choice = pandas.ExcelWriter(path_first_choice, engine='openpyxl')
 
+names_list_before = namesWithScores["Nazwisko i imię"]
+names_list_after = pandas.Series()
 
 for cls in classes:
-    # save to csv
-    # accepted_class[cls][["Nazwisko i imię", "points_"+ str(cls).lower(), "pierwszy wybór", "drugi wybór", "trzeci wybór", "czwarty wybór", "piąty wybór", "szósty wybór"]].to_csv("results/" + cls + ".csv")
-    # rejected_class[cls][["Nazwisko i imię", "points_" + str(cls).lower(), "pierwszy wybór", "drugi wybór", "trzeci wybór",
-    #      "czwarty wybór", "piąty wybór", "szósty wybór"]].to_csv("results_rejected/" + cls + ".csv")
-
-
+    names_list_after = names_list_after.append(ranking_class[cls]["Nazwisko i imię"], ignore_index=True)
     accepted_class[cls][
         ["Nazwisko i imię", "points_" + str(cls).lower()]].to_excel(writer, sheet_name=cls)
     rejected_class[cls][
         ["Nazwisko i imię", "points_" + str(cls).lower()]].to_excel(writer_rejected, sheet_name=cls)
     ranking_class_first_choice[cls][["Nazwisko i imię", "points_" + str(cls).lower()]].to_excel(writer_first_choice, sheet_name=cls)
 
+names_list_after = names_list_after.sort_values()
+names_list_before = names_list_before.sort_values()
+print(names_list_before)
+print(names_list_after)
+names_list_before = names_list_before.to_list()
+names_list_after = names_list_after.to_list()
 
+na = pandas.Series(names_list_after)
+nb = pandas.Series(names_list_before)
+comparison = pandas.concat([nb, na], axis=1, ignore_index=True, sort=True)
+# comparison = pandas.DataFrame({'s1': names_list_before, 's2': names_list_after})
+comparison.to_excel(writer_general, sheet_name='end-to-end')
+writer_general.save()
+
+
+
+# print(names_list_after.equals(names_list_before))
+# print(names_list_before)
+# print(names_list_after)
 writer.save()
 writer_rejected.save()
 writer_first_choice.save()
