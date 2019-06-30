@@ -23,7 +23,7 @@ classRequirements = {"a1": "język obcy",
 classes = ["A", "B", "C", "D", "E", "F"]
 
 
-subjects = ["język polski","język obcy","historia","wos","matematyka","fizyka","chemia","biologia","geografia"]
+subjects = ["język polski","język obcy","historia","matematyka","fizyka","chemia","biologia","geografia"]
 marksToPoints_gimnazjum = {
     6: 18,
     5: 17,
@@ -176,23 +176,27 @@ for cls in classes:
 
 ranking_class_first_choice = ranking_class.copy()
 
-for choice in choicesList:
-    for cls in classes:
-        for subcls in classes:
-            if cls != subcls:
-                ranking_class[cls] = ranking_class[cls].append(rejected_class[subcls][rejected_class[subcls][choice] == cls], ignore_index=True)
-                ranking_class[cls] = ranking_class[cls].sort_values("points_" + str(cls).lower(), ascending=False)
-                accepted_class[cls] = ranking_class[cls].head(classCount[cls])
-                rejected_class[cls] = ranking_class[cls].tail(max(0, ranking_class[cls].shape[0]-classCount[cls]))
-                # ranking_class[subcls] = ranking_class[subcls][ranking_class[subcls][choice] != cls ]
-                # ranking_class[subcls].drop(rejected_class[subcls][rejected_class[subcls][choice] == cls]["Nazwisko i imię"], inplace=True)
-                ranking_class[subcls].drop(ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0]-classCount[subcls]))[ranking_class[subcls][choice] == cls].index, inplace=True)
-                # ranking_class[subcls] = ranking_class[subcls][:-max(0, ranking_class[subcls].shape[0]-classCount[subcls])][ranking_class[subcls][choice] != cls]
-                ranking_class[subcls].sort_values("points_" + str(subcls).lower(), ascending=False, inplace = True)
-                accepted_class[subcls] = ranking_class[subcls].head(classCount[subcls])
-                rejected_class[subcls] = ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0] - classCount[subcls]))
+for i in range(0, 12):
+    for choice in choicesList:
+        for cls in classes:
+            for subcls in classes:
+                if cls != subcls:
+                    ranking_class[cls] = ranking_class[cls].append(rejected_class[subcls][rejected_class[subcls][choice] == cls], ignore_index=True)
+                    ranking_class[cls] = ranking_class[cls].sort_values("points_" + str(cls).lower(), ascending=False)
+                    accepted_class[cls] = ranking_class[cls].head(classCount[cls])
+                    rejected_class[cls] = ranking_class[cls].tail(max(0, ranking_class[cls].shape[0]-classCount[cls]))
+                    # ranking_class[subcls] = ranking_class[subcls][ranking_class[subcls][choice] != cls ]
+                    # ranking_class[subcls].drop(rejected_class[subcls][rejected_class[subcls][choice] == cls]["Nazwisko i imię"], inplace=True)
+                    ranking_class[subcls].drop(ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0]-classCount[subcls]))[ranking_class[subcls][choice] == cls].index, inplace=True)
+                    # ranking_class[subcls] = ranking_class[subcls][:-max(0, ranking_class[subcls].shape[0]-classCount[subcls])][ranking_class[subcls][choice] != cls]
+                    ranking_class[subcls].sort_values("points_" + str(subcls).lower(), ascending=False, inplace = True)
+                    accepted_class[subcls] = ranking_class[subcls].head(classCount[subcls])
+                    rejected_class[subcls] = ranking_class[subcls].tail(max(0, ranking_class[subcls].shape[0] - classCount[subcls]))
+
+
 
                 # rejected_class[subcls] = rejected_class[subcls][rejected_class[subcls][choice] != cls]
+
 
 
 
@@ -216,8 +220,7 @@ for cls in classes:
 
 names_list_after = names_list_after.sort_values()
 names_list_before = names_list_before.sort_values()
-print(names_list_before)
-print(names_list_after)
+
 names_list_before = names_list_before.to_list()
 names_list_after = names_list_after.to_list()
 
